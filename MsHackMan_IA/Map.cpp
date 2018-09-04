@@ -29,7 +29,10 @@ Map::Map(int _width, int _height)
     }
     mapBad[0][0] = mapGood[0][0] = 0;
 
-    makeDist(mapGood, true, 2, 14);
+    //makeDist(mapBad, false);
+    makeDist(mapGood, true);
+
+    printMapInt(mapGood);
 
     //printMap();
 
@@ -97,30 +100,84 @@ Map::updateMap(string _field)
 //           afeta principalmente no gate, pois o menor caminho atravessa o gate
 //  _x e _y = posição atual
 void
-Map::makeDist(int _map[15][19], bool isGood, int _x, int _y)
+Map::makeDist(int _map[15][19], bool isGood, int _i, int _j)
 {
+    /*
+    map[_i][_j] = "o";
+
+    if (_i > 0)
+        map[_i-1][_j] = "c";
+    if (_j > 0)
+        map[_i][_j-1] = "e";
+    if(_i < (linha - 1))
+        map[_i+1][_j] = "b";
+    if(_j < (coluna - 1))
+        map[_i][_j+1] = "d";
+    
+    printMap();
+    */
+
+    //Caso estejamos no portal e seja pra mapear coisas boas
+    //  (pois bugs não atravessam, logo a influência não passa pelo portal)
+    if (map[_i][_j] == "G" && isGood)
+    {
+        //caso estejamos no portal A
+        if (_j == gateA.y)
+        {
+            if (_map[gateB.x][gateB.y] > (_map[_i][_j] + 1))
+            {
+                _map[gateB.x][gateB.y] = _map[_i][_j] + 1;
+                makeDist(_map, isGood, gateB.x, gateB.y);
+            }
+        }
+        else
+        {
+            if (_map[gateA.x][gateA.y] > (_map[_i][_j] + 1))
+            {
+                _map[gateA.x][gateA.y] = _map[_i][_j] + 1;
+                makeDist(_map, isGood, gateA.x, gateA.y);
+            }
+        }
+    }
+    
     //verifica o valor de cima
-    if (_y > 0 && map[_x][_y - 1] == ".")
+    if (_i > 0 && map[_i - 1][_j] == ".")
     {
         //verifica se o valor de cima é maior que o valor atual +1
         //se for, coloca o valor atual mais no lugar e chama a recursão
         //para o novo ponto
-        cout << "caminho pra cima\n";
+        if (_map[_i - 1][_j] > (_map[_i][_j] + 1))
+        {
+            _map[_i - 1][_j] = _map[_i][_j] + 1;
+            makeDist(_map, isGood, _i - 1, _j);
+        }
     }
     //verifica o valor da esquerda
-    if (_x > 0 && map[_x - 1][_y] == ".")
+    if (_j > 0 && (map[_i][_j - 1] == "." || map[_i][_j - 1] == "G"))
     {
-        cout << "caminho para a esquerda\n";
+        if (_map[_i][_j - 1] > (_map[_i][_j] + 1))
+        {
+            _map[_i][_j - 1] = _map[_i][_j] + 1;
+            makeDist(_map, isGood, _i, _j - 1);
+        }
     }
     //verifica o valor de baixo
-    if (_y < (linha - 1) && map[_x][_y + 1] == ".")
+    if (_i < (linha - 1) && map[_i + 1][_j] == ".")
     {
-        cout << "caminho para baixo\n";
+        if (_map[_i + 1][_j] > (_map[_i][_j] + 1))
+        {
+            _map[_i + 1][_j] = _map[_i][_j] + 1;
+            makeDist(_map, isGood, _i + 1, _j);
+        }
     }
     //verifica o valor da direita
-    if (_x < (coluna - 1) && map[_x + 1][_y] == ".")
+    if (_j < (coluna - 1) && (map[_i][_j + 1] == "." || map[_i][_j + 1] == "G"))
     {
-        cout << "caminho para direita\n";
+        if (_map[_i][_j + 1] > (_map[_i][_j] + 1))
+        {
+            _map[_i][_j + 1] = _map[_i][_j] + 1;
+            makeDist(_map, isGood, _i, _j + 1);
+        }
     }
 }
 
@@ -145,7 +202,13 @@ Map::printMapInt(int _map[15][19])
     {
         for (int j = 0; j < coluna; ++j)
         {
-            cout << map[i][j] << " ";
+            if (_map[i][j] < 10)
+                cout << 0 << _map[i][j];
+            else if (_map[i][j] == 1000)
+                cout << "xx";
+            else
+                cout << _map[i][j];
+            cout << " ";
         }
 
         cout << endl;

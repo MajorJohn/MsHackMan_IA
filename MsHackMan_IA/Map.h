@@ -27,7 +27,7 @@ private:
 
     void printMap();
     void printMapInt(int _map[15][19]);
-    void makeDist(int _map[15][19], bool isGood, int _x = 0, int _y = 0);
+    void makeDist(int _map[15][19], bool isGood, int _i = 0, int _j = 0);
     void findGates();
 
 public:
