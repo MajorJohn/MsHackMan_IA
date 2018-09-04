@@ -32,7 +32,7 @@ Map::Map(int _width, int _height)
     //makeDist(mapBad, false);
     makeDist(mapGood, true);
 
-    printMapInt(mapGood);
+    //printMapInt(mapGood);
 
     //printMap();
 
