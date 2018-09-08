@@ -66,6 +66,7 @@ NextCommand::update()
     {
         map = new Map(width, height);
         firstUpdate = false;
+        map->setPlayerID(me.id);
     }
 
     string player_name, type, field;
