@@ -8,7 +8,7 @@ Map::Map(int _width, int _height)
     {
         for (int j = 0; j < coluna; ++j)
         {
-            distMap[i][j] = 1000;
+            bugDistMap[i][j] = distMap[i][j] = 1000;
         }
     }
 }
@@ -28,7 +28,7 @@ Map::updateMap(string _field)
     {
         for (int j = 0; j < coluna; ++j)
         {
-            while (s < _field.size() && _field[s] != ',')
+            if (s < _field.size() && _field[s] != ',')
             {
                 //se é um player
                 if (_field[s] == 'P')
@@ -58,22 +58,7 @@ Map::updateMap(string _field)
                         tmp->type = _field[s] - 48;
                     }
                     spawn.push_back(*tmp);
-                }
-                //se é um portal
-                else if (_field[s] == 'G' && fUpdate)
-                {
-                    s++;
-                    if (_field[s] == 'l')
-                    {
-                        gateA.x = i;
-                        gateA.y = j;
-                    }
-                    else
-                    {
-                        gateB.x = i;
-                        gateB.y = j;
-                    }
-                }
+                }                
                 //se é um bug
                 else if (_field[s] == 'E')
                 {
@@ -108,12 +93,16 @@ Map::updateMap(string _field)
                     tmp->type = _field[s] - 48;
                     snippers.push_back(*tmp);
                 }
-                s++;
+                while (s < _field.size() && _field[s] != ',')
+                    s++;
+                if(_field[s] == ',')
+                    s++;
             }
             s++;
         }
     }
 
+    /*
     for (int i = 0; i < bugs.size(); i++)
     {
         cout << "bug: " << bugs[i].x << " " << bugs[i].y << " " << bugs[i].type << endl;
@@ -126,17 +115,29 @@ Map::updateMap(string _field)
     {
         cout << "snipper: " << snippers[i].x << " " << snippers[i].y << endl;
     }
+    */
 
     if (fUpdate) 
-    {        
+    {
+        s = 0;
         for (int i = 0; i < linha; ++i)
         {
             for (int j = 0; j < coluna; ++j)
             {
-                map[i][j] = "";
+                if (_field[s] == 'x')
+                {
+                    map[i][j] = "x";
+                }
+                else if(_field[s] == 'G')
+                {
+                    map[i][j] = "G";
+                }
+                else
+                {
+                    map[i][j] = ".";
+                }
                 while (s < _field.size() && _field[s] != ',')
                 {
-                    map[i][j] += _field[s];
                     s++;
                 }
                 s++;
@@ -155,7 +156,7 @@ Map::updateMap(string _field)
 //           afeta principalmente no gate, pois o menor caminho atravessa o gate
 //  _x e _y = posição atual
 void
-Map::makeDist(int _map[100][100], int _i, int _j)
+Map::makeDist(int _map[100][100], bool _isBad, int _i, int _j)
 {
     /*
     map[_i][_j] = "o";
@@ -174,7 +175,7 @@ Map::makeDist(int _map[100][100], int _i, int _j)
 
     //Caso estejamos no portal e seja pra mapear coisas boas
     //  (pois bugs não atravessam, logo a influência não passa pelo portal)
-    if (map[_i][_j] == "G")
+    if (map[_i][_j] == "G" && !_isBad)
     {
         //caso estejamos no portal A
         if (_j == gateA.y)
@@ -182,7 +183,7 @@ Map::makeDist(int _map[100][100], int _i, int _j)
             if (_map[gateB.x][gateB.y] > (_map[_i][_j] + 1))
             {
                 _map[gateB.x][gateB.y] = _map[_i][_j] + 1;
-                makeDist(_map, gateB.x, gateB.y);
+                makeDist(_map, _isBad, gateB.x, gateB.y);
             }
         }
         else
@@ -190,7 +191,7 @@ Map::makeDist(int _map[100][100], int _i, int _j)
             if (_map[gateA.x][gateA.y] > (_map[_i][_j] + 1))
             {
                 _map[gateA.x][gateA.y] = _map[_i][_j] + 1;
-                makeDist(_map, gateA.x, gateA.y);
+                makeDist(_map, _isBad, gateA.x, gateA.y);
             }
         }
     }
@@ -204,7 +205,7 @@ Map::makeDist(int _map[100][100], int _i, int _j)
         if (_map[_i - 1][_j] > (_map[_i][_j] + 1))
         {
             _map[_i - 1][_j] = _map[_i][_j] + 1;
-            makeDist(_map, _i - 1, _j);
+            makeDist(_map, _isBad, _i - 1, _j);
         }
     }
     //verifica o valor da esquerda
@@ -213,7 +214,7 @@ Map::makeDist(int _map[100][100], int _i, int _j)
         if (_map[_i][_j - 1] > (_map[_i][_j] + 1))
         {
             _map[_i][_j - 1] = _map[_i][_j] + 1;
-            makeDist(_map, _i, _j - 1);
+            makeDist(_map, _isBad, _i, _j - 1);
         }
     }
     //verifica o valor de baixo
@@ -222,7 +223,7 @@ Map::makeDist(int _map[100][100], int _i, int _j)
         if (_map[_i + 1][_j] > (_map[_i][_j] + 1))
         {
             _map[_i + 1][_j] = _map[_i][_j] + 1;
-            makeDist(_map, _i + 1, _j);
+            makeDist(_map, _isBad, _i + 1, _j);
         }
     }
     //verifica o valor da direita
@@ -231,9 +232,35 @@ Map::makeDist(int _map[100][100], int _i, int _j)
         if (_map[_i][_j + 1] > (_map[_i][_j] + 1))
         {
             _map[_i][_j + 1] = _map[_i][_j] + 1;
-            makeDist(_map, _i, _j + 1);
+            makeDist(_map, _isBad, _i, _j + 1);
         }
     }
+}
+
+void
+Map::findGates()
+{
+    bool gA = false;
+
+    for (int i = 0; i < linha; ++i)
+    {
+        for (int j = 0; j < coluna; ++j)
+        {
+            if (!gA && map[i][j] == "G")
+            {
+                gateA.x = i;
+                gateA.y = j;
+                gA = true;
+            }
+            else if (map[i][j] == "G")
+            {
+                gateB.x = i;
+                gateB.y = j;
+            }
+        }
+    }
+
+    //cout << ">>> Gate A: " << gateA.x << " " << gateA.y << endl << ">>> Gate B: " << gateB.x << " " << gateB.y << endl;
 }
 
 void
@@ -244,8 +271,6 @@ Map::printMap()
         for (int j = 0; j < coluna; ++j)
         {
             cout << map[i][j] << " ";
-            if (map[i][j].size() < 2)
-                cout << " ";
         }
 
         cout << endl;
@@ -275,12 +300,19 @@ Map::printMapInt(int _map[100][100])
 void
 Map::firstUpdate()
 {    
-    distMap[0][0] = 0;
-    makeDist(distMap);
-
-    fUpdate = false;
-
-    //printMapInt(distMap);
+    bugDistMap[0][0] = distMap[0][0] = 0;
+    
 
     //printMap();
+
+    findGates();
+
+    makeDist(distMap);
+    cout << "good map:\n"; printMapInt(distMap);
+
+    makeDist(bugDistMap, true);
+    cout << "bad map:\n"; printMapInt(bugDistMap);
+
+
+    fUpdate = false;
 }

@@ -19,6 +19,7 @@ class Map
 private:
     string map[100][100];
     int distMap[100][100];
+    int bugDistMap[100][100];
 
     Point gateA, gateB;
 
@@ -39,7 +40,8 @@ private:
 
     void printMap();
     void printMapInt(int _map[100][100]);
-    void makeDist(int _map[100][100], int _i = 0, int _j = 0);
+    void findGates();
+    void makeDist(int _map[100][100], bool isBad = false, int _i = 0, int _j = 0);
     void firstUpdate();
 
 public:
