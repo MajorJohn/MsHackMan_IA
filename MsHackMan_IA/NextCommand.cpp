@@ -68,8 +68,8 @@ NextCommand::update()
         map = new Map(width, height);
         firstUpdate = false;
         map->setPlayerID(me.id);
-        //map->getMap(sMap);
-        //useBomb();
+        coluna = width;
+        linha = height;
     }
 
     string player_name, type, field;
@@ -112,7 +112,12 @@ NextCommand::action()
     }
     else if (action == "move") {
         cin >> time_remaining;
-        doMove();
+        if (!scapingBomb)
+            doMove();
+        else
+        {
+            scape();
+        }
     }
 }
 
@@ -130,14 +135,17 @@ void
 NextCommand::doMove()
 {
     sendoPerseguido = false;
+    spawns.clear();
     snippets.clear();
     bugs.clear();
     bombs.clear();
+    sUseBomb = "\n";
 
     map->getPlayerPos(me.point);
     map->getSnippets(snippets);
     map->getBugs(bugs);
     map->getBombs(bombs);
+    map->getSpawns(spawns);
 
 
     up = 1000000;
@@ -228,37 +236,42 @@ NextCommand::doMove()
         }
     }
 
+    int multInflu = 1;
+
+    if (sendoPerseguido && me.bombs == 0)
+        multInflu = 3;
+
     //melhor caminho pras bombas
     if (achoubomb)
     { 
         int tmp;
         if (canUp)
         {
-            tmp = 96 - map->distAB(bombProximo, me.point.x - 1, me.point.y);
+            tmp = 96 * multInflu - map->distAB(bombProximo, me.point.x - 1, me.point.y);
             if(gUp < tmp)
                 gUp = tmp;
         }
         if (canLeft)
         {
-            tmp = 96 - map->distAB(bombProximo, me.point.x, me.point.y - 1);
+            tmp = 96 * multInflu - map->distAB(bombProximo, me.point.x, me.point.y - 1);
             if (gLeft < tmp)
                 gLeft = tmp;
         }
         if (canDown)
         {
-            tmp = 96 - map->distAB(bombProximo, me.point.x + 1, me.point.y);
+            tmp = 96 * multInflu - map->distAB(bombProximo, me.point.x + 1, me.point.y);
             if (gDown < tmp)
                 gDown = tmp;
         }
         if (canRight)
         {
-            tmp = 96 - map->distAB(bombProximo, me.point.x, me.point.y + 1);
+            tmp = 96 * multInflu - map->distAB(bombProximo, me.point.x, me.point.y + 1);
             if (gRight < tmp)
                 gRight = tmp;
         }
     }
 
-    cout << gUp << " " << gLeft << " " << gDown << " " << gRight << endl;
+    //cout << gUp << " " << gLeft << " " << gDown << " " << gRight << endl;
 
     //identifica bugs
     Point bugProximo;
@@ -278,10 +291,7 @@ NextCommand::doMove()
     }
 
     if (bugMaisProximo < 5)
-        sendoPerseguido = true;
-
-    //if (bugMaisProximo < 3)
-    //    useBomb();
+        sendoPerseguido = true;    
 
     if(achouBug)
     {
@@ -294,7 +304,81 @@ NextCommand::doMove()
         if(canRight)
             bRight = 100 - map->distAB(bugProximo, me.point.x, me.point.y + 1, false);
     }
+
+    //identifica spawn points
+    Point spawnProximo;
+    int spawnMaisProximo = 1000;
+    bool achouSpawn = false;
+
+    for (int i = 0; i < spawns.size(); i++)
+    {
+        if (spawns[i].type != 250)
+        {
+            int dist = map->distAB(me.point, spawns[i], false);
+            if (spawnMaisProximo > dist + spawns[i].type)
+            {
+                achouSpawn = true;
+                spawnMaisProximo = dist + spawns[i].type;
+                spawnProximo.x = spawns[i].x;
+                spawnProximo.y = spawns[i].y;
+                spawnProximo.type = spawns[i].type;
+            }
+        }
+    }
+    
+    if (achouSpawn)
+    {
+        int tmp;
+        if (canUp)
+        {
+            tmp = 100 - map->distAB(spawnProximo, me.point.x - 1, me.point.y, false);
+            if (bUp < tmp)
+                bUp = tmp;
+        }
+        if (canLeft)
+        {
+            tmp = 100 - map->distAB(spawnProximo, me.point.x, me.point.y - 1, false);
+            if (bLeft < tmp)
+                bLeft = tmp;
+        }
+        if (canDown)
+        {
+            tmp = 100 - map->distAB(spawnProximo, me.point.x + 1, me.point.y, false);
+            if (bDown < tmp)
+                bDown = tmp;
+        }
+        if (canRight)
+        {
+            tmp = 100 - map->distAB(spawnProximo, me.point.x, me.point.y + 1, false);
+            if (bRight < tmp)
+                bRight = tmp;
+        }
+    }
+
+    //identificando explosão
+
     //cout << bUp << " " << bLeft << " " << bDown << " " << bRight << endl;
+    /*Point bombProximo;
+    int bombMaisProximo = 1000;
+    bool achoubomb = false;
+
+    for (int i = 0; i < bombs.size(); i++)
+    {
+        if (bombs[i].type != 10)
+        {
+            int dist = map->distAB(me.point, bombs[i]);
+            if (bombMaisProximo > dist)
+            {
+                achoubomb = true;
+                bombMaisProximo = dist;
+                bombProximo.x = bombs[i].x;
+                bombProximo.y = bombs[i].y;
+            }
+        }
+    }*/
+
+    if (sendoPerseguido && me.bombs == 0)
+        multInflu = 3;
 
     if (canUp)
     {
@@ -327,36 +411,219 @@ NextCommand::doMove()
 
     caseIqual();
 
+    if (bugMaisProximo < 4 && me.bombs > 0)
+        useBomb(bugMaisProximo);
+
     cout << "Trono up: " << up << endl << "Trono left: " << left << endl << "Trono down: " << down << endl << "Trono right: " << right << endl;
+
 
     //********* Decidir o movimento *************
     //caso Up
-    if (up < left && up < down && up < right)
-        cout << "up\n";
-    else if (left < down && left < right)
-        cout << "left\n";
-    else if (down < right)
-        cout << "down\n";
+    if (scapingBomb)
+    {
+        cout << pathScapeBomb[0];
+    }
     else
-        cout << "right\n";
+    {
+        if (up < left && up < down && up < right)
+            cout << "up";
+        else if (left < down && left < right)
+            cout << "left";
+        else if (down < right)
+            cout << "down";
+        else
+            cout << "right";
+    }
 
+    cout << sUseBomb;
     inflZero();
 }
 
 void
-NextCommand::useBomb()
+NextCommand::useBomb(int _distBug)
 {
-    int coluna = width;
-    int linha = height;
+    pass = 0;
+    bugUp = false;
+    bugLeft = false;
+    bugDown = false;
+    bugRight = false;
+    int d;
+    int j = 0;
 
-    for (int i = 0; i < linha; ++i)
+    if (firstBomb)
     {
-        for (int j = 0; j < coluna; ++j)
-        {
-            cout << sMap[i][j] << " ";
-        }
+        getMap();
+        firstBomb = false;
+    }
 
-        cout << endl;
+
+    int x = me.point.x;
+    int y = me.point.y;
+
+    if (up < left && up < down && up < right)
+    {
+        x--;
+        pathScapeBomb[0] = "up";
+        bugDown = true;
+    }
+    else if (left < down && left < right)
+    {
+        y--;
+        pathScapeBomb[0] = "left";
+        bugRight = true;
+    }
+    else if (down < right)
+    {
+        x++;
+        pathScapeBomb[0] = "down";
+        bugUp = true;
+    }
+    else
+    {
+        y++;
+        pathScapeBomb[0] = "right";
+        bugLeft = true;
+    }
+
+    bool tmpCanUp = false;
+    bool tmpCanLeft = false;
+    bool tmpCanDown = false;
+    bool tmpCanRight = false;
+
+    if (map->canGo(x - 1, y))
+    {
+        tmpCanUp = true;
+    }
+    if (map->canGo(x, y - 1))
+    {
+        tmpCanLeft = true;
+    }
+    if (map->canGo(x + 1, y))
+    {
+        tmpCanDown = true;
+    }
+    if (map->canGo(x, y + 1))
+    {
+        tmpCanRight = true;
+    }
+
+    for (int i = 1; i < 6; i++)
+    {
+        if (!usingBomb)
+        {
+            if (!bugUp && tmpCanUp)
+            {
+                if (map->canGo(x - i, y - 1))
+                {
+                    usingBomb = true;
+                    timeBomb = i;
+                    for (j = 1; j <= i; j++)
+                    {
+                        pathScapeBomb[j] = "up";
+                    }
+                    pathScapeBomb[j] = "left";
+                }
+                else if (map->canGo(x - i, y + 1))
+                {
+                    usingBomb = true;
+                    timeBomb = i;
+                    for (j = 1; j <= i; j++)
+                    {
+                        pathScapeBomb[j] = "up";
+                    }
+                    pathScapeBomb[j] = "right";
+                }
+            }
+            if (!bugLeft && !usingBomb && tmpCanLeft)
+            {
+                if (map->canGo(x - 1, y - i))
+                {
+                    usingBomb = true;
+                    timeBomb = i;
+                    for (j = 1; j <= i; j++)
+                    {
+                        pathScapeBomb[j] = "left";
+                    }
+                    pathScapeBomb[j] = "up";
+                }
+                else if (map->canGo(x + 1, y - i))
+                {
+                    usingBomb = true;
+                    timeBomb = i;
+                    for (j = 1; j <= i; j++)
+                    {
+                        pathScapeBomb[j] = "left";
+                    }
+                    pathScapeBomb[j] = "down";
+                }
+            }
+            if (!bugDown && !usingBomb && tmpCanDown)
+            {
+                if (map->canGo(x + i, y - 1))
+                {
+                    usingBomb = true;
+                    timeBomb = i;
+                    for (j = 1; j <= i; j++)
+                    {
+                        pathScapeBomb[j] = "down";
+                    }
+                    pathScapeBomb[j] = "left";
+                }
+                else if (map->canGo(x + i, y - 1))
+                {
+                    usingBomb = true;
+                    timeBomb = i;
+                    for (j = 1; j <= i; j++)
+                    {
+                        pathScapeBomb[j] = "down";
+                    }
+                    pathScapeBomb[j] = "right";
+                }
+            }
+            if (!bugRight && !usingBomb && tmpCanRight)
+            {
+                if (map->canGo(x - 1, y + i))
+                {
+                    usingBomb = true;
+                    timeBomb = i;
+                    for (j = 1; j <= i; j++)
+                    {
+                        pathScapeBomb[j] = "right";
+                    }
+                    pathScapeBomb[j] = "up";
+                }
+                else if (map->canGo(x + 1, y + i))
+                {
+                    usingBomb = true;
+                    timeBomb = i;
+                    for (j = 1; j <= i; j++)
+                    {
+                        pathScapeBomb[j] = "right";
+                    }
+                    pathScapeBomb[j] = "down";
+                }
+            }
+        }
+    }
+
+    if (usingBomb)
+    {
+        scapingBomb = true;
+        timeBomb ++;
+        sUseBomb = ";drop_bomb " + to_string(timeBomb) + "\n";
+    }
+}
+
+void
+NextCommand::scape()
+{
+    pass++;
+    cout << pathScapeBomb[pass];
+    cout << endl;
+    if (pass >= timeBomb)
+    {
+        scapingBomb = false;
+        usingBomb = false;
     }
 }
 
@@ -532,6 +799,18 @@ NextCommand::inflZero()
         for (int j = 0; j < 50; ++j)
         {
             influencias[i][j].snippet = 0;
+        }
+    }
+}
+
+void
+NextCommand::getMap()
+{
+    for (int i = 0; i < linha; ++i)
+    {
+        for (int j = 0; j < coluna; ++j)
+        {
+            sMap[i][j] = map->getMap(i, j);
         }
     }
 }

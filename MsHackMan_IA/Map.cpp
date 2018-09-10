@@ -368,6 +368,13 @@ Map::getBombs(vector<Point> & _bombs)
         _bombs.push_back(bombs[i]);
 }
 
+void
+Map::getSpawns(vector<Point> & _spws)
+{
+    for (int i = 0; i < spawn.size(); i++)
+        _spws.push_back(spawn[i]);
+}
+
 bool
 Map::isWall(int _i, int _j)
 {
@@ -534,15 +541,9 @@ Map::canGo(int _i, int _j)
     return map[_i][_j] != "x";
 }
 
-void
-Map::getMap(string _map[20][20])
+string
+Map::getMap(int _i, int _j)
 {
-    for (int i = 0; i < linha; ++i)
-    {
-        for (int j = 0; j < coluna; ++j)
-        {
-            _map[i][j] = map[i][j];
-        }
-    }
+    return map[_i][_j];
 }
 

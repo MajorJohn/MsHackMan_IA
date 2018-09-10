@@ -34,6 +34,9 @@ private:
     int width;
     int height;
 
+    int coluna;
+    int linha;
+
     int timebank;
     int time_per_move;
     int time_remaining;
@@ -67,7 +70,18 @@ private:
 
     bool sendoPerseguido;
     bool usingBomb;
-    int scapingBomb;
+    bool scapingBomb;
+    int timeBomb;
+    bool firstBomb = false;
+    int pass;
+
+    bool bugUp;
+    bool bugLeft;
+    bool bugDown;
+    bool bugRight;
+
+    string sUseBomb;
+    string pathScapeBomb[10];
     string sMap[20][20];
 
     vector< Point > snippets;
@@ -75,7 +89,7 @@ private:
     //não sei porque, mas quando não declaro algo antes do vector bugs, da uma especie de segmetion fall
     vector< Point > bug;
     vector< Point > bugs;
-    vector< Point > spawn_points;
+    vector< Point > spawns;
 
     bool boy = false;
 
@@ -92,7 +106,9 @@ private:
 
     void caseIqual();
 
-    void useBomb();
+    void getMap();
+    void useBomb(int _distBug);
+    void scape();
 
 public:
 

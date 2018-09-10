@@ -69,6 +69,7 @@ public:
     void getSnippets(vector<Point> & _snp);
     void getBugs(vector<Point> & _bugs);
     void getBombs(vector<Point> & _bombs);
+    void getSpawns(vector<Point> & _spws);
 
     bool isWall(int _i, int _j);
 
@@ -78,7 +79,7 @@ public:
 
     bool canGo(int _i, int _j);
 
-    void getMap(string _map[20][20]) ;
+    string getMap(int _i, int _j);
 };
 
 #endif
