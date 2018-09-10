@@ -19,6 +19,10 @@ struct Player {
     Point point;
 };
 
+struct Influencia {
+    int snippet;
+};
+
 class NextCommand
 {
 private:
@@ -36,12 +40,42 @@ private:
     int max_rounds;
     int current_round;
 
+    //influência pra cima([0][j]), esquerda([1][j])
+    //pra baixo([2][j]) e direita ([3][j])
+    //onde j é a quantidade de objetos com a influência j
+    Influencia influencias[4][40];
+
+    bool canUp;
+    bool canLeft;
+    bool canDown;
+    bool canRight;
+
+    int up;
+    int left;
+    int down;
+    int right;
+
+    int bUp;
+    int bLeft;
+    int bDown;
+    int bRight;
+
+    int gUp;
+    int gLeft;
+    int gDown;
+    int gRight;
+
+    bool sendoPerseguido;
+    bool usingBomb;
+    int scapingBomb;
+    string sMap[20][20];
+
     vector< Point > snippets;
-    vector< Point > weapons;
+    vector< Point > bombs;
+    //não sei porque, mas quando não declaro algo antes do vector bugs, da uma especie de segmetion fall
+    vector< Point > bug;
     vector< Point > bugs;
     vector< Point > spawn_points;
-    vector< Point > gates;
-    vector< vector<string> > cells;
 
     bool boy = false;
 
@@ -54,14 +88,18 @@ private:
     void chooseCharacter();
     void doMove();
 
+    void inflZero();
+
+    void caseIqual();
+
+    void useBomb();
+
 public:
 
     NextCommand();
     ~NextCommand();
 
     void process();
-
-    void debug();
 
 
 };
