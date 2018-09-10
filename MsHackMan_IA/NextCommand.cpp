@@ -414,7 +414,7 @@ NextCommand::doMove()
     if (bugMaisProximo < 4 && me.bombs > 0)
         useBomb(bugMaisProximo);
 
-    cout << "Trono up: " << up << endl << "Trono left: " << left << endl << "Trono down: " << down << endl << "Trono right: " << right << endl;
+    //cout << "Trono up: " << up << endl << "Trono left: " << left << endl << "Trono down: " << down << endl << "Trono right: " << right << endl;
 
 
     //********* Decidir o movimento *************
