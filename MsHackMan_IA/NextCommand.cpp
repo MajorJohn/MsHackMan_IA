@@ -280,8 +280,8 @@ NextCommand::doMove()
     if (bugMaisProximo < 5)
         sendoPerseguido = true;
 
-    if (bugMaisProximo < 3)
-        useBomb();
+    //if (bugMaisProximo < 3)
+    //    useBomb();
 
     if(achouBug)
     {
