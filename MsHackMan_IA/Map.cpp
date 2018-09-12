@@ -56,7 +56,7 @@ Map::updateMap(string _field)
                     spawn.push_back(*tmp);
 
                     todo.push_back(*tmp);
-                }                
+                }
                 //se é um bug
                 else if (_field[s] == 'E')
                 {
@@ -66,7 +66,7 @@ Map::updateMap(string _field)
                     s++;
                     tmp->type = _field[s] - 48;
                     bugs.push_back(*tmp);
-                    todo.push_back(*tmp);                    
+                    todo.push_back(*tmp);
                 }
                 //se é bomba
                 else if (_field[s] == 'B')
@@ -103,19 +103,19 @@ Map::updateMap(string _field)
     /*
     for (int i = 0; i < bugs.size(); i++)
     {
-        cout << "bug: " << bugs[i].x << " " << bugs[i].y << " " << bugs[i].type << endl;
+    cout << "bug: " << bugs[i].x << " " << bugs[i].y << " " << bugs[i].type << endl;
     }
     for (int i = 0; i < bombs.size(); i++)
     {
-        cout << "bomb: " << bombs[i].x << " " << bombs[i].y << " " << bombs[i].type << endl;
+    cout << "bomb: " << bombs[i].x << " " << bombs[i].y << " " << bombs[i].type << endl;
     }
     for (int i = 0; i < snippets.size(); i++)
     {
-        cout << "snippet: " << snippets[i].x << " " << snippets[i].y << endl;
+    cout << "snippet: " << snippets[i].x << " " << snippets[i].y << endl;
     }
     */
 
-    if (fUpdate) 
+    if (fUpdate)
     {
         s = 0;
         for (int i = 0; i < linha; ++i)
@@ -128,10 +128,10 @@ Map::updateMap(string _field)
                     {
                         map[i][j] = "x";
                     }
-                    else if(_field[s] == 'G')
+                    else if (_field[s] == 'G')
                     {
                         map[i][j] = "G";
-                        while (s+1 < _field.size() && _field[s+1] != ',')
+                        while (s + 1 < _field.size() && _field[s + 1] != ',')
                         {
                             s++;
                         }
@@ -139,7 +139,7 @@ Map::updateMap(string _field)
                     else
                     {
                         map[i][j] = ".";
-                    }               
+                    }
                     s++;
                 }
                 s++;
@@ -183,14 +183,14 @@ Map::makeDist(int _map[20][20], int _i, int _j, bool _isBad)
     map[_i][_j] = "o";
 
     if (_i > 0)
-        map[_i-1][_j] = "c";
+    map[_i-1][_j] = "c";
     if (_j > 0)
-        map[_i][_j-1] = "e";
+    map[_i][_j-1] = "e";
     if(_i < (linha - 1))
-        map[_i+1][_j] = "b";
+    map[_i+1][_j] = "b";
     if(_j < (coluna - 1))
-        map[_i][_j+1] = "d";
-    
+    map[_i][_j+1] = "d";
+
     printMap();
     */
 
@@ -216,7 +216,7 @@ Map::makeDist(int _map[20][20], int _i, int _j, bool _isBad)
             }
         }
     }
-    
+
     //verifica o valor de cima
     if (_i > 0 && map[_i - 1][_j] != "x")
     {
@@ -241,7 +241,7 @@ Map::makeDist(int _map[20][20], int _i, int _j, bool _isBad)
     //verifica o valor de baixo
     if (_i < (linha - 1) && map[_i + 1][_j] != "x")
     {
-        if (_map[_i + 1][_j] > (_map[_i][_j] + 1))
+        if (_map[_i + 1][_j] >(_map[_i][_j] + 1))
         {
             _map[_i + 1][_j] = _map[_i][_j] + 1;
             makeDist(_map, _i + 1, _j, _isBad);
@@ -250,7 +250,7 @@ Map::makeDist(int _map[20][20], int _i, int _j, bool _isBad)
     //verifica o valor da direita
     if (_j < (coluna - 1) && (map[_i][_j + 1] != "x"))
     {
-        if (_map[_i][_j + 1] > (_map[_i][_j] + 1))
+        if (_map[_i][_j + 1] >(_map[_i][_j] + 1))
         {
             _map[_i][_j + 1] = _map[_i][_j] + 1;
             makeDist(_map, _i, _j + 1, _isBad);
@@ -350,7 +350,7 @@ Map::validMoves(vector<string> & _vm)
 void
 Map::getSnippets(vector<Point> & _snp)
 {
-    for(int i = 0; i < snippets.size(); i++)
+    for (int i = 0; i < snippets.size(); i++)
         _snp.push_back(snippets[i]);
 }
 
@@ -382,9 +382,9 @@ Map::isWall(int _i, int _j)
         return false;
     if (_j < 0)
         return false;
-    if (_i > (linha - 1))
+    if (_i >(linha - 1))
         return false;
-    if (_j > (coluna - 1))
+    if (_j >(coluna - 1))
         false;
 
     if (map[_i][_j] == "x")
@@ -459,9 +459,9 @@ Map::distAB(int _i, int _j, Point _b, bool _isGood)
         return 1000;
     if (_j < 0)
         return 1000;
-    if (_i > (linha - 1))
+    if (_i >(linha - 1))
         return 1000;
-    if (_j > (coluna - 1))
+    if (_j >(coluna - 1))
         return 1000;
 
     if (_isGood)
@@ -496,9 +496,9 @@ Map::distAB(Point _a, int _i, int _j, bool _isGood)
         return 1000000;
     if (_j < 0)
         return 1000000;
-    if (_i > (linha - 1))
+    if (_i >(linha - 1))
         return 1000000;
-    if (_j > (coluna - 1))
+    if (_j >(coluna - 1))
         return 1000000;
 
     if (_isGood)
@@ -533,9 +533,9 @@ Map::canGo(int _i, int _j)
         return false;
     if (_j < 0)
         return false;
-    if (_i > (linha - 1))
+    if (_i >(linha - 1))
         return false;
-    if (_j > (coluna - 1))
+    if (_j >(coluna - 1))
         return false;
 
     return map[_i][_j] != "x";

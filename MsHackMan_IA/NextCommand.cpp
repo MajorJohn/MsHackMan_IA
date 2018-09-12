@@ -2,7 +2,7 @@
 
 
 NextCommand::NextCommand()
-{    
+{
     inflZero();
 }
 
@@ -162,7 +162,7 @@ NextCommand::doMove()
     gLeft = 1000000;
     gDown = 1000000;
     gRight = 1000000;
-    
+
     if (map->canGo(me.point.x - 1, me.point.y))
     {
         canUp = true;
@@ -183,7 +183,7 @@ NextCommand::doMove()
         canRight = true;
         bRight = gRight = right = 0;
     }
-    
+
 
     //identificar qual o snippet mais próximo
     Point snippetProximo;
@@ -201,18 +201,18 @@ NextCommand::doMove()
             snippetProximo.y = snippets[i].y;
         }
     }
-    
-    
+
+
     //cerifica o melhor caminho nas quatro direções
     if (achouSnippet)
     {
-        if(canUp)
+        if (canUp)
             gUp = 95 - map->distAB(snippetProximo, me.point.x - 1, me.point.y);
-        if(canLeft)
+        if (canLeft)
             gLeft = 95 - map->distAB(snippetProximo, me.point.x, me.point.y - 1);
-        if(canDown)
+        if (canDown)
             gDown = 95 - map->distAB(snippetProximo, me.point.x + 1, me.point.y);
-        if(canRight)
+        if (canRight)
             gRight = 95 - map->distAB(snippetProximo, me.point.x, me.point.y + 1);
     }
 
@@ -243,12 +243,12 @@ NextCommand::doMove()
 
     //melhor caminho pras bombas
     if (achoubomb)
-    { 
+    {
         int tmp;
         if (canUp)
         {
             tmp = 96 * multInflu - map->distAB(bombProximo, me.point.x - 1, me.point.y);
-            if(gUp < tmp)
+            if (gUp < tmp)
                 gUp = tmp;
         }
         if (canLeft)
@@ -291,17 +291,17 @@ NextCommand::doMove()
     }
 
     if (bugMaisProximo < 5)
-        sendoPerseguido = true;    
+        sendoPerseguido = true;
 
-    if(achouBug)
+    if (achouBug)
     {
-        if(canUp)
+        if (canUp)
             bUp = 100 - map->distAB(bugProximo, me.point.x - 1, me.point.y, false);
-        if(canLeft)
+        if (canLeft)
             bLeft = 100 - map->distAB(bugProximo, me.point.x, me.point.y - 1, false);
-        if(canDown)
+        if (canDown)
             bDown = 100 - map->distAB(bugProximo, me.point.x + 1, me.point.y, false);
-        if(canRight)
+        if (canRight)
             bRight = 100 - map->distAB(bugProximo, me.point.x, me.point.y + 1, false);
     }
 
@@ -325,7 +325,7 @@ NextCommand::doMove()
             }
         }
     }
-    
+
     if (achouSpawn)
     {
         int tmp;
@@ -364,17 +364,17 @@ NextCommand::doMove()
 
     for (int i = 0; i < bombs.size(); i++)
     {
-        if (bombs[i].type != 10)
-        {
-            int dist = map->distAB(me.point, bombs[i]);
-            if (bombMaisProximo > dist)
-            {
-                achoubomb = true;
-                bombMaisProximo = dist;
-                bombProximo.x = bombs[i].x;
-                bombProximo.y = bombs[i].y;
-            }
-        }
+    if (bombs[i].type != 10)
+    {
+    int dist = map->distAB(me.point, bombs[i]);
+    if (bombMaisProximo > dist)
+    {
+    achoubomb = true;
+    bombMaisProximo = dist;
+    bombProximo.x = bombs[i].x;
+    bombProximo.y = bombs[i].y;
+    }
+    }
     }*/
 
     if (sendoPerseguido && me.bombs == 0)
@@ -443,10 +443,7 @@ void
 NextCommand::useBomb(int _distBug)
 {
     pass = 0;
-    bugUp = false;
-    bugLeft = false;
-    bugDown = false;
-    bugRight = false;
+    usingBomb = false;
     int d;
     int j = 0;
 
@@ -456,7 +453,26 @@ NextCommand::useBomb(int _distBug)
         firstBomb = false;
     }
 
+    PathScapeBomb();
 
+    if (usingBomb)
+    {
+        scapingBomb = true;
+        timeBomb++;
+        sUseBomb = ";drop_bomb " + to_string(timeBomb) + "\n";
+    }
+}
+
+void
+NextCommand::PathScapeBomb(int timeToExplode)
+{
+    pass = 0;
+    bugUp = false;
+    bugLeft = false;
+    bugDown = false;
+    bugRight = false;
+
+    int j;
     int x = me.point.x;
     int y = me.point.y;
 
@@ -507,7 +523,7 @@ NextCommand::useBomb(int _distBug)
         tmpCanRight = true;
     }
 
-    for (int i = 1; i < 6; i++)
+    for (int i = 1; i < timeToExplode + 1; i++)
     {
         if (!usingBomb)
         {
@@ -605,13 +621,6 @@ NextCommand::useBomb(int _distBug)
             }
         }
     }
-
-    if (usingBomb)
-    {
-        scapingBomb = true;
-        timeBomb ++;
-        sUseBomb = ";drop_bomb " + to_string(timeBomb) + "\n";
-    }
 }
 
 void
@@ -643,21 +652,21 @@ NextCommand::caseIqual()
             }
             else
             {
-                up += bUp; 
+                up += bUp;
                 left += bLeft;
             }
 
             if (up == left)
             {
-                tmp = rand() % 2;       
-                if(tmp < 1)
+                tmp = rand() % 2;
+                if (tmp < 1)
                     up -= 1;
                 else
                     left -= 1;
             }
 
             up -= 200;
-            left -= 200;        
+            left -= 200;
         }
         if (up == down && canUp)
         {
